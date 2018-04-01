@@ -1,0 +1,4 @@
+#!/bin/sh
+test $# -ge 2 || exit 1
+data="$1"; shift;
+curl -X POST -H 'Content-Type: application/json' -d "$data" $@

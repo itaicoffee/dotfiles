@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Pick lines. With flag -s, pick one line.
+pick() {
+    while read -r line; do
+        printf '%s? ' "$line" >/dev/tty
+        read -r reply </dev/tty
+        if test "$reply" = y; then
+            echo "$line"
+            test "$1" = -s && break
+        fi
+    done
+}
+
+# Try to check out this branch.
+test "$1" && git checkout "$1" 2>/dev/null && exit 0
+
+# If checking out this branch didn't work, find branches that match that name.
+branch=$(git branch 2>/dev/null | sed s/^..// | grep "${1:-.}" | pick -s)
+test "$branch" || exit 1
+
+git checkout "$branch"

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Pick lines. If -s, pick one line.
+pick() {
+    while read -r line; do
+        printf '%s? ' "$line" >/dev/tty
+        read reply </dev/tty
+        if test "$reply" = y; then
+            echo "$line"
+            test "$1" = -s && break
+        fi
+    done
+}
+
+# Find matching filenames, filter blacklist, pick a single filename.
+rg -il . | rg -i "$1" | rg -v '\.pyc$' | pick -s

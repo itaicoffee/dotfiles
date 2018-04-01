@@ -1,0 +1,5 @@
+#!/bin/sh
+
+addr=$(ipconfig getifaddr en0)
+echo "$addr"
+echo "$addr" | tr -d '\n' | pbcopy

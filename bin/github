@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo https://github.com/duolingo/duolingo-"$1"/$2/$3

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+test "$1" = -l && { lucky=1; shift; }
+
+query="$1"; shift
+for x in $@; do
+    query=$query+$x
+done
+
+open -a /Applications/Firefox.app/ https://www.google.com/search?q=$query${lucky+\&btnI}
