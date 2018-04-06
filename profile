@@ -14,7 +14,7 @@ sorti() {
 }
 
 # Aliases
-alias d2='cd ~/Documents/code/duolingo-2 && . env/bin/activate'
+alias d2='cd ~/Documents/code/duolingo-2 && . .pyenv/bin/activate'
 alias dios='cd ~/Documents/code/duolingo-ios'
 alias dandroid='cd ~/Documents/code/duolingo-android'
 alias dweb='cd ~/Documents/code/duolingo-web'
