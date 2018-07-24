@@ -18,6 +18,7 @@ alias d2='cd ~/Documents/code/duolingo-2 && . .pyenv/bin/activate'
 alias dios='cd ~/Documents/code/duolingo-ios'
 alias dandroid='cd ~/Documents/code/duolingo-android'
 alias dweb='cd ~/Documents/code/duolingo-web'
+alias dt='cd ~/Documents/code/athena-backend'
 # Default arguments
 alias lk='goo -l'  # Google I'm feeling lucky
 alias nosetests='nosetests --nocapture --nologcapture'
@@ -39,6 +40,7 @@ alias gls='git ls-files'
 alias glsu='git ls-files --others --exclude-standard'
 alias gp='git pull'
 alias gs='git status'
+alias gss='git status -s | grep ^A'
 alias gca='git commit --amend --all --no-edit'
 # Path shortcuts
 export CLOUD=$HOME/Dropbox/plycion/cloud
