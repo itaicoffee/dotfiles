@@ -40,7 +40,7 @@ alias gls='git ls-files'
 alias glsu='git ls-files --others --exclude-standard'
 alias gp='git pull'
 alias gs='git status'
-alias gss='git status -s | grep ^A'
+alias gss="git status -s | grep ^[A-Z] | awk '{ print $2 }'"
 alias gca='git commit --amend --all --no-edit'
 # Path shortcuts
 export CLOUD=$HOME/Dropbox/plycion/cloud
@@ -71,6 +71,5 @@ export ANDROID_BUILD=assembleGoogleNowearableDefaultbrandDebug
 launchctl setenv PATH $PATH
 launchctl setenv ANDROID_NDK_HOME $ANDROID_NDK_HOME
 
-# Load nvm
-export NVM_DIR="/Users/itai/.nvm"
-test -s "$NVM_DIR/nvm.sh" & . "$NVM_DIR/nvm.sh"
+# nodenv
+which nodenv >/dev/null && eval "$(nodenv init -)"
