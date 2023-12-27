@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Define the source directory
+SOURCE_DIR="/Users/itai/Desktop"
+
+# Get the current date and time for the folder name
+CURRENT_DATETIME=$(date +%Y-%m-%d_%H%M%S)
+
+# Define the target directory with the timestamp
+TARGET_DIR="/Users/itai/Documents/archive/$CURRENT_DATETIME"
+
+# Function to check if directory is empty
+is_empty() {
+    for _ in "$1"/*; do
+        [ -e "$_" ] && return 1
+        break
+    done
+    return 0
+}
+
+# Check if the Desktop directory is empty
+if is_empty "$SOURCE_DIR"; then
+    echo "No files to move. Desktop is already clean."
+else
+    # Create the target directory
+    mkdir -p "$TARGET_DIR"
+
+    # Move regular files and directories from Desktop to the target directory
+    for file in "$SOURCE_DIR"/*; do
+        if [ -e "$file" ]; then
+            mv "$file" "$TARGET_DIR/"
+        fi
+    done
+    echo "Files moved to archive."
+fi
