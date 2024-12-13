@@ -39,25 +39,4 @@ encoded_query=$(urlencode "$query")
 claude_url="https://claude.ai/new?q=${encoded_query}"
 
 url $claude_url 'Profile 1'
-exit
-
-# Open URL in default browser
-case "$(uname -s)" in
-    Darwin*)    # macOS
-        open "$claude_url"
-        ;;
-    Linux*)     # Linux
-        xdg-open "$claude_url" 2>/dev/null || \
-        sensible-browser "$claude_url" 2>/dev/null || \
-        x-www-browser "$claude_url" 2>/dev/null || \
-        gnome-open "$claude_url" 2>/dev/null || \
-        echo "Could not detect the web browser to use"
-        ;;
-    CYGWIN*|MINGW*|MSYS*)  # Windows
-        start "$claude_url"
-        ;;
-    *)
-        echo "Unsupported operating system"
-        exit 1
-        ;;
-esac
+close_iterm
