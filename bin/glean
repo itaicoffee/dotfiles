@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+url $(url_query 'https://app.glean.com/search?q={query}' $@) $CHROME_PROFILE_WORK
+close_iterm

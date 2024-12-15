@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/bin/sh
+
+source_if_exists() { [ -f "$1" ] && . "$1"; }
+source_if_exists "${HOME}/.profile"
 
 # Example URL - replace with your desired URL
 URL=$1
