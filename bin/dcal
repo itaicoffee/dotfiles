@@ -1,0 +1,9 @@
+#!/bin/sh
+
+source_if_exists() { [ -f "$1" ] && . "$1"; }
+source_if_exists "${HOME}/.profile"
+
+chrome_profile=$CHROME_PROFILE_WORK || 'Default'
+url 'https://calendar.google.com' "${chrome_profile}"
+close_iterm
+

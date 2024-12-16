@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. ~/.profile
+
+confluence_url=$(url_query 'https://duolingo.atlassian.net/wiki/search?text={query}' $@)
+url $confluence_url "$CHROME_PROFILE_WORKK"
+close_iterm
