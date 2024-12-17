@@ -6,11 +6,6 @@ from difflib import get_close_matches
 import json
 import os
 
-# Configuration - store name->url mappings
-PEOPLE = {
-    "natalia": "https://example.com/natalia",
-    "colombo": "https://example.com/colombo"
-}
 
 def load_config():
     """Load configuration from ~/.config/book/config.json if it exists"""
@@ -18,7 +13,7 @@ def load_config():
     if config_path.exists():
         with open(config_path) as f:
             return json.load(f)
-    return PEOPLE
+    return {}
 
 def find_best_match(name, names):
     """Find the closest matching name using fuzzy matching"""
@@ -35,6 +30,10 @@ def open_url(url):
         print(f"Error running url script: {e}", file=sys.stderr)
         sys.exit(1)
 
+def close_iterm():
+    command = "close_iterm"
+    subprocess.run(command, shell=True, check=True)
+    
 def main():
     if len(sys.argv) != 2:
         print("Usage: one <name>", file=sys.stderr)
@@ -54,6 +53,7 @@ def main():
     url = people[match]
     print(f"Opening URL for {match}...")
     open_url(url)
+    close_iterm()
 
 if __name__ == "__main__":
     main()
