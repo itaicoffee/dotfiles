@@ -1,0 +1,9 @@
+#!/bin/sh
+
+. ~/.profile
+
+google_url=$(url_query "http://www.google.com/search?q={query}&btnI" $@)
+chrome_profile=$CHROME_PROFILE_PERSONAL || 'Profile 1'
+echo $chrome_profile
+url $google_url "$chrome_profile"
+close_iterm
