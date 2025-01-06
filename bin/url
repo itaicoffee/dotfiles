@@ -6,6 +6,8 @@ source_if_exists "${HOME}/.profile"
 # Example URL - replace with your desired URL
 URL=$1
 
+printf "profile: %s\n" $2
+
 # For the profile shown in the screenshot
 PROFILE_DIR=$2 || "Profile 1"  # or it might be "Profile 1" depending on your setup
 
