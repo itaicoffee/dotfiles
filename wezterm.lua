@@ -6,7 +6,7 @@ local config = {}
 config.color_scheme = 'Dracula'
 
 -- Font settings
-config.font = wezterm.font 'Fira Code'
+-- config.font = wezterm.font 'Fira Code'
 config.font_size = 17.0
 
 -- Window settings

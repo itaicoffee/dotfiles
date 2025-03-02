@@ -67,6 +67,7 @@ create_dirs:
 	@mkdir -p $(CONFIG_DIR)/yabai
 	@mkdir -p $(CONFIG_DIR)/skhd
 	@mkdir -p $(CONFIG_DIR)/wezterm
+	@mkdir -p $(CONFIG_DIR)/book
 	@mkdir -p "$(XBAR_PLUGINS_DIR)"
 	@mkdir -p $(HOME_DIR)/.local/bin
 	@if [ ! -d $(BIN_DIR) ]; then \
@@ -82,7 +83,7 @@ install_configs:
 	@ln -sf $(DOTFILES_DIR)/yabairc $(CONFIG_DIR)/yabai/yabairc
 	@ln -sf $(DOTFILES_DIR)/skhdrc $(CONFIG_DIR)/skhd/skhdrc
 	@ln -sf $(DOTFILES_DIR)/profile $(HOME_DIR)/.profile
-	@ln -sf $(DOTFILES_DIR)/book_config.json $(HOME_DIR)/.book_config.json
+	@ln -sf $(DOTFILES_DIR)/book_config.json $(CONFIG_DIR)/book/config.json
 	@ln -sf $(DOTFILES_DIR)/wezterm.lua $(CONFIG_DIR)/wezterm/wezterm.lua
 
 # Install bin scripts
