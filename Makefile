@@ -66,6 +66,7 @@ create_dirs:
 	@echo "Creating necessary directories..."
 	@mkdir -p $(CONFIG_DIR)/yabai
 	@mkdir -p $(CONFIG_DIR)/skhd
+	@mkdir -p $(CONFIG_DIR)/wezterm
 	@mkdir -p "$(XBAR_PLUGINS_DIR)"
 	@mkdir -p $(HOME_DIR)/.local/bin
 	@if [ ! -d $(BIN_DIR) ]; then \
@@ -82,6 +83,7 @@ install_configs:
 	@ln -sf $(DOTFILES_DIR)/skhdrc $(CONFIG_DIR)/skhd/skhdrc
 	@ln -sf $(DOTFILES_DIR)/profile $(HOME_DIR)/.profile
 	@ln -sf $(DOTFILES_DIR)/book_config.json $(HOME_DIR)/.book_config.json
+	@ln -sf $(DOTFILES_DIR)/wezterm.lua $(CONFIG_DIR)/wezterm/wezterm.lua
 
 # Install bin scripts
 .PHONY: install_bin
@@ -151,6 +153,7 @@ uninstall:
 	@rm -f $(CONFIG_DIR)/skhd/skhdrc
 	@rm -f $(HOME_DIR)/.profile
 	@rm -f $(HOME_DIR)/.book_config.json
+	@rm -f $(CONFIG_DIR)/wezterm/wezterm.lua
 	@for file in $(DOTFILES_DIR)/bin/*; do \
 		filename=$$(basename $$file); \
 		if [ -L $(BIN_DIR)/$$filename ] && [ $$(readlink $(BIN_DIR)/$$filename) = "$$file" ]; then \
