@@ -6,7 +6,7 @@ DOTFILES_DIR := $(shell pwd)
 HOME_DIR := $(HOME)
 BIN_DIR := /usr/local/bin
 CONFIG_DIR := $(HOME_DIR)/.config
-XBAR_PLUGINS_DIR := $(HOME_DIR)/Library/Application\ Support/xbar/plugins
+XBAR_PLUGINS_DIR := $(HOME)/Library/Application\ Support/xbar/plugins
 
 # Default target
 .PHONY: all
@@ -14,7 +14,7 @@ all: install
 
 # Main installation target
 .PHONY: install
-install: check_brew install_packages create_dirs install_configs install_bin install_xbar ensure_services_running
+install: check_brew install_packages create_dirs install_configs install_bin install_xbar ensure_services_running check-chrome-profiles install-xbar-menubar-scripts install-zshrc ensure-profile
 
 # Check if Homebrew is installed
 .PHONY: check_brew
@@ -190,4 +190,105 @@ help:
 	@echo "  create_dirs     - Create necessary directories"
 	@echo "  install_configs - Install configuration files"
 	@echo "  install_bin     - Install bin scripts"
-	@echo "  install_xbar    - Install xbar plugins" 
+	@echo "  install_xbar    - Install xbar plugins"
+	@echo "  check-chrome-profiles - Check Chrome profile environment variables"
+	@echo "  list-chrome-profiles - List available Chrome profiles"
+	@echo "  set-chrome-profile - Set Chrome profile environment variable"
+
+# Check Chrome profile environment variables (now sourcing ~/.profile first)
+check-chrome-profiles:
+	@echo "Checking Chrome profile environment variables..."
+	@if [ -f "$(HOME)/.profile" ]; then \
+		echo "Sourcing ~/.profile to check for Chrome profile variables..."; \
+		CHROME_PROFILE_WORK=$$(source "$(HOME)/.profile" 2>/dev/null && echo "$$CHROME_PROFILE_WORK"); \
+		CHROME_PROFILE_PERSONAL=$$(source "$(HOME)/.profile" 2>/dev/null && echo "$$CHROME_PROFILE_PERSONAL"); \
+		CHROME_PROFILE_DEFAULT=$$(source "$(HOME)/.profile" 2>/dev/null && echo "$$CHROME_PROFILE_DEFAULT"); \
+		if [ -z "$$CHROME_PROFILE_WORK" ]; then \
+			echo "WARNING: CHROME_PROFILE_WORK is not defined in ~/.profile"; \
+			echo "Run 'make list-chrome-profiles' to see available profiles"; \
+			echo "Then set it with 'make set-chrome-profile PROFILE_TYPE=WORK PROFILE_NAME=YourProfileName'"; \
+		else \
+			echo "CHROME_PROFILE_WORK is set to: $$CHROME_PROFILE_WORK"; \
+		fi; \
+		if [ -z "$$CHROME_PROFILE_PERSONAL" ]; then \
+			echo "WARNING: CHROME_PROFILE_PERSONAL is not defined in ~/.profile"; \
+		else \
+			echo "CHROME_PROFILE_PERSONAL is set to: $$CHROME_PROFILE_PERSONAL"; \
+		fi; \
+		if [ -z "$$CHROME_PROFILE_DEFAULT" ]; then \
+			echo "WARNING: CHROME_PROFILE_DEFAULT is not defined in ~/.profile"; \
+		else \
+			echo "CHROME_PROFILE_DEFAULT is set to: $$CHROME_PROFILE_DEFAULT"; \
+		fi; \
+	else \
+		echo "~/.profile doesn't exist yet. Run 'make ensure-profile' first."; \
+		echo "Then set Chrome profiles with 'make set-chrome-profile PROFILE_TYPE=TYPE PROFILE_NAME=NAME'"; \
+	fi
+
+# List available Chrome profiles
+list-chrome-profiles:
+	@echo "Listing available Chrome profiles..."
+	@if [ -d "$$HOME/Library/Application Support/Google/Chrome" ]; then \
+		echo "Found profiles on macOS:"; \
+		ls -1 "$$HOME/Library/Application Support/Google/Chrome" | grep -E "Profile|Default"; \
+	elif [ -d "$$HOME/.config/google-chrome" ]; then \
+		echo "Found profiles on Linux:"; \
+		ls -1 "$$HOME/.config/google-chrome" | grep -E "Profile|Default"; \
+	elif [ -d "$$LOCALAPPDATA/Google/Chrome/User Data" ]; then \
+		echo "Found profiles on Windows:"; \
+		ls -1 "$$LOCALAPPDATA/Google/Chrome/User Data" | grep -E "Profile|Default"; \
+	else \
+		echo "No Chrome profiles found in standard locations."; \
+	fi
+
+# Set Chrome profile environment variable
+set-chrome-profile:
+	@if [ -z "$(PROFILE_TYPE)" ] || [ -z "$(PROFILE_NAME)" ]; then \
+		echo "Usage: make set-chrome-profile PROFILE_TYPE=WORK|PERSONAL|DEFAULT PROFILE_NAME=YourProfileName"; \
+		exit 1; \
+	fi
+	@echo "Setting CHROME_PROFILE_$(PROFILE_TYPE)=$(PROFILE_NAME)"
+	@echo "export CHROME_PROFILE_$(PROFILE_TYPE)=\"$(PROFILE_NAME)\"" >> $(HOME)/.profile
+	@echo "Added to ~/.profile. Restart your terminal or run 'source ~/.profile'"
+	@echo "Note: Make sure your ~/.zshrc sources ~/.profile for these settings to take effect"
+
+# Detect shell type
+SHELL_TYPE := $(shell if [ -n "$$ZSH_VERSION" ]; then echo "zsh"; elif [ -n "$$BASH_VERSION" ]; then echo "bash"; else echo "unknown"; fi)
+
+# Create directory for xbar plugins if it doesn't exist
+$(XBAR_PLUGINS_DIR):
+	@echo "Creating xbar plugins directory..."
+	@mkdir -p "$(HOME)/Library/Application Support/xbar/plugins"
+
+# Symlink menubar scripts to xbar plugins folder
+install-xbar-menubar-scripts: 
+	@echo "Creating xbar plugins directory if needed..."
+	@mkdir -p "$(HOME)/Library/Application Support/xbar/plugins"
+	@echo "Symlinking menubar scripts to xbar plugins folder..."
+	@for script in $(shell find ./menubar -name "*.sh" -o -name "*.py" -o -name "*.js" 2>/dev/null); do \
+		chmod +x "$$script"; \
+		ln -sf "$(PWD)/$$script" "$(HOME)/Library/Application Support/xbar/plugins/$$(basename $$script)"; \
+		echo "Linked: $$script"; \
+	done
+
+# Symlink zshrc from the repo to ~/.zshrc
+install-zshrc:
+	@echo "Setting up ~/.zshrc as symlink to repository zshrc..."
+	@if [ -f "$(HOME)/.zshrc" ] && [ ! -L "$(HOME)/.zshrc" ]; then \
+		echo "Backing up existing ~/.zshrc to ~/.zshrc.backup"; \
+		mv "$(HOME)/.zshrc" "$(HOME)/.zshrc.backup"; \
+	fi
+	@ln -sf "$(PWD)/zshrc" "$(HOME)/.zshrc"
+	@echo "Created symlink: $(HOME)/.zshrc -> $(PWD)/zshrc"
+
+# Ensure profile exists for machine-specific settings (if it doesn't exist yet)
+ensure-profile:
+	@if [ ! -f "$(HOME)/.profile" ]; then \
+		echo "Creating ~/.profile for machine-specific settings..."; \
+		echo "# Machine-specific settings - not managed by git" > "$(HOME)/.profile"; \
+		echo "# Add your machine-specific environment variables and settings here" >> "$(HOME)/.profile"; \
+		echo "" >> "$(HOME)/.profile"; \
+	else \
+		echo "~/.profile already exists for machine-specific settings"; \
+	fi
+	@echo "Note: Make sure your ~/.zshrc sources ~/.profile for machine-specific settings" 
