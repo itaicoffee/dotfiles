@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# Rename close_iterm to close_terminal for better clarity
+# This script detects and closes the active terminal window
+
+close_terminal() {
+    # Try to close iTerm if it's running
+    if pgrep -q "iTerm"; then
+        osascript -e 'tell application "iTerm" to if (count of windows) > 0 then close window 1'
+        return
+    fi
+    
+    # Try to close WezTerm if it's running
+    if pgrep -q "WezTerm"; then
+        # Use wezterm CLI if available
+        if command -v wezterm &>/dev/null; then
+            wezterm cli list-clients | head -1 | awk '{print $1}' | xargs -I{} wezterm cli send-text --client-id {} "\x03"
+        else
+            osascript -e 'tell application "WezTerm" to if (count of windows) > 0 then close window 1'
+        fi
+        return
+    fi
+    
+    # Try to close Terminal.app if it's running
+    if pgrep -q "Terminal"; then
+        osascript -e 'tell application "Terminal" to if (count of windows) > 0 then close window 1'
+        return
+    fi
+    
+    # Try to close Alacritty if it's running
+    if pgrep -q "alacritty"; then
+        osascript -e 'tell application "Alacritty" to if (count of windows) > 0 then close window 1'
+        return
+    fi
+    
+    # Try to close Kitty if it's running
+    if pgrep -q "kitty"; then
+        pkill -f "kitty --single-instance"
+        return
+    fi
+    
+    # If we got here, no supported terminal was detected
+    echo "No supported terminal emulator detected or all are closed."
+}
+
+close_terminal 

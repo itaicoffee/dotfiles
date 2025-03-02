@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/zsh
 
-wezterm cli kill-pane
+/opt/homebrew/bin/wezterm cli kill-pane
