@@ -81,3 +81,9 @@ launchctl setenv ANDROID_NDK_HOME $ANDROID_NDK_HOME
 
 # nodenv
 which nodenv >/dev/null && eval "$(nodenv init -)"
+export PATH="/usr/local/bin:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"  # For Apple Silicon Macs
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

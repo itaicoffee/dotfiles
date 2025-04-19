@@ -56,7 +56,7 @@ install_packages:
 		elif [ -f $(HOME)/Applications/WezTerm.app/Contents/Resources/wezterm ]; then \
 			sudo ln -sf $(HOME)/Applications/WezTerm.app/Contents/Resources/wezterm $(BIN_DIR)/wezterm; \
 		else \
-			echo "⚠️ Warning: WezTerm application found but CLI not found at expected location"; \
+			echo "⚠️ Warning: WezTerm CLI not found at expected locations. Installation will continue."; \
 		fi \
 	fi
 
@@ -71,9 +71,8 @@ create_dirs:
 	@mkdir -p "$(XBAR_PLUGINS_DIR)"
 	@mkdir -p $(HOME_DIR)/.local/bin
 	@if [ ! -d $(BIN_DIR) ]; then \
-		echo "Warning: $(BIN_DIR) does not exist. You may need to create it manually with sudo."; \
-		echo "Run: sudo mkdir -p $(BIN_DIR)"; \
-		exit 1; \
+		echo "Warning: $(BIN_DIR) does not exist. Attempting to create it..."; \
+		sudo mkdir -p $(BIN_DIR) || echo "Failed to create $(BIN_DIR). You may need to create it manually with sudo."; \
 	fi
 
 # Install configuration files
@@ -127,23 +126,35 @@ start_services:
 .PHONY: ensure_services_running
 ensure_services_running:
 	@echo "Ensuring all services are running..."
-	@if ! pgrep -q yabai; then \
-		echo "yabai is not running, starting it..."; \
-		yabai --start-service || echo "Failed to start yabai. Try starting manually with 'yabai --start-service'"; \
+	@if command -v yabai >/dev/null 2>&1; then \
+		if ! pgrep -q yabai; then \
+			echo "yabai is not running, starting it..."; \
+			yabai --start-service || echo "Failed to start yabai. Try starting manually with 'yabai --start-service'"; \
+		else \
+			echo "yabai is already running"; \
+		fi \
 	else \
-		echo "yabai is already running"; \
+		echo "yabai command not found. Skipping yabai service start."; \
 	fi
-	@if ! pgrep -q skhd; then \
-		echo "skhd is not running, starting it..."; \
-		skhd --start-service || echo "Failed to start skhd. Try starting manually with 'skhd --start-service'"; \
+	@if command -v skhd >/dev/null 2>&1; then \
+		if ! pgrep -q skhd; then \
+			echo "skhd is not running, starting it..."; \
+			skhd --start-service || echo "Failed to start skhd. Try starting manually with 'skhd --start-service'"; \
+		else \
+			echo "skhd is already running"; \
+		fi \
 	else \
-		echo "skhd is already running"; \
+		echo "skhd command not found. Skipping skhd service start."; \
 	fi
-	@if ! pgrep -q xbar; then \
-		echo "xbar is not running, starting it..."; \
-		open -a xbar || echo "Failed to start xbar"; \
+	@if [ -d "/Applications/xbar.app" ] || [ -d "$(HOME)/Applications/xbar.app" ]; then \
+		if ! pgrep -q xbar; then \
+			echo "xbar is not running, starting it..."; \
+			open -a xbar || echo "Failed to start xbar"; \
+		else \
+			echo "xbar is already running"; \
+		fi \
 	else \
-		echo "xbar is already running"; \
+		echo "xbar application not found. Skipping xbar start."; \
 	fi
 
 # Uninstall everything
