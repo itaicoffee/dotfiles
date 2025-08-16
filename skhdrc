@@ -6,7 +6,9 @@ cmd + shift - return : open -a "Google Chrome"
 
 cmd + shift - c : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Chat.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Chat.app"; else open "https://chat.openai.com"; fi
 cmd + shift - l : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Claude.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Claude.app"; else open "https://claude.ai"; fi
+cmd + shift - y : if [ -d "/Users/itai/Applications/Chrome Apps.localized/YouTube.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/YouTube.app"; else open "https://youtube.com"; fi
 cmd + shift - s : open -a "Slack"
+cmd + shift - w : open -a /Applications/WhatsApp.app
 
 # moves focus between windows in the current focused display
 alt - h : yabai -m window --focus west
@@ -64,6 +66,7 @@ shift + alt - f : yabai -m window --toggle native-fullscreen
 
 # increase gap in focused space
 alt - g : yabai -m space --gap rel:10
+shift + alt - g : yabai -m space --gap rel:-10
 
 # decrease gap in focused space
 shift + alt - g : yabai -m space --gap rel:-10
