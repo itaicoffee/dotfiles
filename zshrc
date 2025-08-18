@@ -87,3 +87,19 @@ export PATH="/opt/homebrew/bin:$PATH"  # For Apple Silicon Macs
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# zoxide setup
+eval "$(zoxide init zsh)"
+
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+# open file from ripgrep results in nvim
+vf() { rg -n --hidden --glob '!.git' "${1:-.}" | fzf | awk -F: '{print "+"$2" "$1}' | xargs -r nvim; }
+
+# jump to dir via fzf + zoxide
+zz() {
+  local d
+  d="$(zoxide query -l | fzf --height=40% --reverse)" || return
+  [ -n "$d" ] && z "$d"
+}

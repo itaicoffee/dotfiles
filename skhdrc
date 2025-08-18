@@ -8,8 +8,15 @@ cmd + shift - c : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Chat.a
 cmd + shift - l : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Claude.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Claude.app"; else open "https://claude.ai"; fi
 cmd + shift - y : if [ -d "/Users/itai/Applications/Chrome Apps.localized/YouTube.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/YouTube.app"; else open "https://youtube.com"; fi
 cmd + shift - g : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Gmail.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Gmail.app"; else open "https://gmail.com"; fi
+cmd + shift - m : open -a "Messages"
 cmd + shift - s : open -a "Slack"
 cmd + shift - w : open -a /Applications/WhatsApp.app
+
+# sketchybar
+# Toggle bar visibility
+alt + shift - b : sketchybar --bar hidden=toggle
+# Force a full refresh (useful while hacking)
+# alt + shift - b : sketchybar --reload && sketchybar --update
 
 # moves focus between windows in the current focused display
 alt - h : yabai -m window --focus west
