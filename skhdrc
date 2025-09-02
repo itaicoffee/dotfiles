@@ -9,6 +9,7 @@ cmd + shift - l : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Claude
 cmd + shift - y : if [ -d "/Users/itai/Applications/Chrome Apps.localized/YouTube.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/YouTube.app"; else open "https://youtube.com"; fi
 cmd + shift - g : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Gmail.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Gmail.app"; else open "https://gmail.com"; fi
 cmd + shift - m : open -a "Messages"
+cmd + shift - p : open -a "Spotify"
 cmd + shift - s : open -a "Slack"
 cmd + shift - w : open -a /Applications/WhatsApp.app
 
