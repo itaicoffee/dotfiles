@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+"""
+nl2gcal.py — Convert a natural-language event into a Google Calendar URL using a local LLM (Ollama).
+
+Requirements:
+  - Ollama running locally (http://localhost:11434) and a chat-capable model pulled
+    e.g., `ollama pull llama3.1:8b-instruct` (default), or set OLLAMA_MODEL.
+
+Usage:
+  echo "Dinner with Molly tomorrow 7–9pm at Dante SoHo" | ./nl2gcal.py
+  ./nl2gcal.py "Technician Tuesday, September 16th, 2025, between 11:00 AM and 3:00 PM."
+
+Env vars:
+  OLLAMA_HOST  (default: http://localhost:11434)
+  OLLAMA_MODEL (default: llama3.1:8b-instruct)
+  EVENT_TZ     (default: America/New_York)
+"""
+import sys, os, json, urllib.request, urllib.error, urllib.parse
+from datetime import datetime, timedelta, timezone
+try:
+    from zoneinfo import ZoneInfo  # Python 3.9+
+except Exception:
+    print("Python 3.9+ required (zoneinfo).", file=sys.stderr)
+    sys.exit(2)
+
+def read_input() -> str:
+    if len(sys.argv) > 1:
+        return " ".join(sys.argv[1:]).strip()
+    data = sys.stdin.read().strip()
+    if data:
+        return data
+    print("Usage: echo 'Meet Bob tomorrow at 3pm' | nl2gcal.py", file=sys.stderr)
+    sys.exit(2)
+
+def call_ollama(nl_text: str, tz: str) -> str:
+    base = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+    model = os.getenv("OLLAMA_MODEL", "llama3.1:8b-instruct")
+    url = f"{base}/api/chat"
+
+    sys_prompt = (
+        "You are an expert event parser. Given ONE natural-language event description, output "
+        "STRICTLY minified JSON with fields: "
+        'title, start, end, all_day, location, description. '
+        "Rules: "
+        f"- Assume timezone {tz} unless another is specified. "
+        '- "start" and "end" MUST be ISO-8601 with timezone offset (e.g., "2025-09-16T11:00:00-04:00"). '
+        '- If a range like "between 11 and 3" is given, set start to the earliest time and end to the latest time that same day. '
+        "- If no end is given, set end to start + 1 hour. "
+        "- If all-day is implied (e.g., 'all day', or a date with no time), set all_day: true and set start 00:00 and end 23:59:59 local. "
+        "- Leave location/description blank if absent. "
+        "- OUTPUT ONLY JSON. No markdown, no commentary."
+    )
+
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": nl_text},
+        ],
+        "stream": False,
+        "options": {"temperature": 0},
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=45) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            content = (data.get("message") or {}).get("content", "")
+            if not content:
+                raise ValueError("Empty LLM response")
+            return content
+    except urllib.error.URLError as e:
+        msg = (
+            f"[error] Could not reach Ollama at {url}.\n"
+            f"Make sure Ollama is running and a model is available.\n\n"
+            f"Quick start:\n"
+            f"  brew install ollama\n"
+            f"  ollama serve &\n"
+            f"  ollama pull {model}\n\n"
+            f"Details: {e}"
+        )
+        print(msg, file=sys.stderr)
+        sys.exit(1)
+
+def extract_json_block(text: str) -> dict:
+    # If fenced, extract the JSON inside ```
+    if "```" in text:
+        import re
+        m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.S)
+        if m:
+            text = m.group(1)
+    # Trim to first {...} block
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1:
+        text = text[start:end+1]
+    return json.loads(text)
+
+def parse_iso_with_tz(s: str, default_tz: str) -> datetime:
+    if not s:
+        return None
+    s = s.strip()
+    if s.endswith("Z"):  # fromisoformat cannot parse 'Z'
+        s = s[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(s)
+    except ValueError as e:
+        raise ValueError(f"Invalid datetime from LLM: {s}") from e
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=ZoneInfo(default_tz))
+    return dt
+
+def build_gcal_url(title: str, start_dt: datetime, end_dt: datetime, all_day: bool,
+                   location: str, description: str, ctz: str) -> str:
+    base = "https://calendar.google.com/calendar/render?action=TEMPLATE"
+    params = {
+        "text": title or "",
+        "details": description or "",
+        "location": location or "",
+        "ctz": ctz,
+    }
+
+    if all_day:
+        sdate = start_dt.date()
+        edate = (end_dt.date() if end_dt else sdate) + timedelta(days=1)  # Google expects end-exclusive
+        dates = f"{sdate:%Y%m%d}/{edate:%Y%m%d}"
+    else:
+        s_utc = start_dt.astimezone(timezone.utc)
+        e_utc = (end_dt or (start_dt + timedelta(hours=1))).astimezone(timezone.utc)
+        dates = f"{s_utc:%Y%m%dT%H%M%SZ}/{e_utc:%Y%m%dT%H%M%SZ}"
+
+    params["dates"] = dates
+    return base + "&" + urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
+
+def main():
+    nl_text = read_input()
+    tz = os.getenv("EVENT_TZ", "America/New_York")
+
+    content = call_ollama(nl_text, tz)
+    try:
+        obj = extract_json_block(content)
+    except Exception as e:
+        print(f"[error] LLM did not return valid JSON.\nRaw content:\n{content}", file=sys.stderr)
+        sys.exit(1)
+
+    title = obj.get("title") or nl_text[:60]
+    location = obj.get("location") or ""
+    description = obj.get("description") or ""
+    all_day = bool(obj.get("all_day"))
+
+    try:
+        start_dt = parse_iso_with_tz(obj.get("start"), tz)
+        end_dt = parse_iso_with_tz(obj.get("end"), tz)
+    except Exception as e:
+        print(f"[error] Bad datetime fields from LLM: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    if not start_dt:
+        print("[error] Missing start datetime from LLM.", file=sys.stderr)
+        sys.exit(1)
+
+    url = build_gcal_url(title, start_dt, end_dt, all_day, location, description, tz)
+    print(url)
+
+if __name__ == "__main__":
+    main()
