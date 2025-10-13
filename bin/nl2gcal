@@ -15,11 +15,11 @@ Env vars:
   OLLAMA_MODEL (default: llama3.1:8b-instruct)
   EVENT_TZ     (default: America/New_York)
 """
-import sys, os, json, urllib.request, urllib.error, urllib.parse
+import sys, os, json, re, urllib.request, urllib.error, urllib.parse
 from datetime import datetime, timedelta, timezone
 try:
     from zoneinfo import ZoneInfo  # Python 3.9+
-except Exception:
+except ImportError:
     print("Python 3.9+ required (zoneinfo).", file=sys.stderr)
     sys.exit(2)
 
@@ -37,7 +37,12 @@ def call_ollama(nl_text: str, tz: str) -> str:
     model = os.getenv("OLLAMA_MODEL", "llama3.1:8b-instruct")
     url = f"{base}/api/chat"
 
+    # Get current date for context
+    now = datetime.now(ZoneInfo(tz))
+    current_date = now.strftime("%A, %B %d, %Y")
+
     sys_prompt = (
+        f"Today is {current_date}. "
         "You are an expert event parser. Given ONE natural-language event description, output "
         "STRICTLY minified JSON with fields: "
         'title, start, end, all_day, location, description. '
@@ -90,10 +95,9 @@ def call_ollama(nl_text: str, tz: str) -> str:
 def extract_json_block(text: str) -> dict:
     # If fenced, extract the JSON inside ```
     if "```" in text:
-        import re
-        m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.S)
-        if m:
-            text = m.group(1)
+        match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.S)
+        if match:
+            text = match.group(1)
     # Trim to first {...} block
     start = text.find("{")
     end = text.rfind("}")
@@ -101,16 +105,16 @@ def extract_json_block(text: str) -> dict:
         text = text[start:end+1]
     return json.loads(text)
 
-def parse_iso_with_tz(s: str, default_tz: str) -> datetime:
-    if not s:
+def parse_iso_with_tz(datetime_str: str, default_tz: str) -> datetime:
+    if not datetime_str:
         return None
-    s = s.strip()
-    if s.endswith("Z"):  # fromisoformat cannot parse 'Z'
-        s = s[:-1] + "+00:00"
+    datetime_str = datetime_str.strip()
+    if datetime_str.endswith("Z"):  # fromisoformat cannot parse 'Z'
+        datetime_str = datetime_str[:-1] + "+00:00"
     try:
-        dt = datetime.fromisoformat(s)
+        dt = datetime.fromisoformat(datetime_str)
     except ValueError as e:
-        raise ValueError(f"Invalid datetime from LLM: {s}") from e
+        raise ValueError(f"Invalid datetime from LLM: {datetime_str}") from e
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=ZoneInfo(default_tz))
     return dt
