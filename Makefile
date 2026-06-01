@@ -49,6 +49,12 @@ install_packages:
 	else \
 		echo "wezterm is already installed"; \
 	fi
+	@if ! brew list zoxide &>/dev/null; then \
+		echo "Installing zoxide..."; \
+		brew install zoxide; \
+	else \
+		echo "zoxide is already installed"; \
+	fi
 	@if ! command -v wezterm &>/dev/null; then \
 		echo "Setting up wezterm CLI..."; \
 		if [ -f /Applications/WezTerm.app/Contents/Resources/wezterm ]; then \
