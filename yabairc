@@ -8,15 +8,6 @@ yabai -m config left_padding     8
 yabai -m config right_padding    8
 yabai -m config auto_balance     on
 
-# borders/opacity (optional)
-yabai -m config window_border           on
-yabai -m config window_border_width     2
-yabai -m config active_window_border_color  0xffc6a0f6
-yabai -m config normal_window_border_color  0xff3b3b3b
-yabai -m config window_opacity          on
-yabai -m config active_opacity          1.0
-yabai -m config normal_opacity          0.95
-
 # mouse helpers
 yabai -m config mouse_modifier   alt
 yabai -m config mouse_action1    move
@@ -30,20 +21,17 @@ yabai -m rule --add app="^Simulator$"       manage=off
 yabai -m rule --add app="^Photos$"          manage=off
 yabai -m rule --add app="^Calendar$" title=".*" manage=off
 
-# space labels (example)
-yabai -m space 1 --label dev
-yabai -m space 2 --label term
-yabai -m space 3 --label web
-yabai -m space 4 --label comms
-yabai -m space 5 --label docs
+# Label available spaces and route apps by role. Missing spaces are skipped so
+# the config remains valid on machines with fewer than five macOS spaces.
+route_app_to_space() {
+    if yabai -m query --spaces --space "$1" >/dev/null 2>&1; then
+        yabai -m space "$1" --label "$2"
+        yabai -m rule --add app="$3" space="$2"
+    fi
+}
 
-# send apps to spaces by role
-yabai -m rule --add app="^Xcode$"       space=dev
-yabai -m rule --add app="^(Kitty|iTerm2)$" space=term
-yabai -m rule --add app="^(Arc|Chrome|Firefox|Safari)$" space=web
-yabai -m rule --add app="^(Slack|Discord|Messages)$" space=comms
-yabai -m rule --add app="^(Notion|Obsidian|Preview)$" space=docs
-
-# signals to keep layouts tidy
-yabai -m signal --add event=display_added   action="yabai -m space --balance"
-yabai -m signal --add event=space_changed   action="yabai -m space --balance"
+route_app_to_space 1 dev   '^Xcode$'
+route_app_to_space 2 term  '^(Ghostty|Kitty|iTerm2|Terminal)$'
+route_app_to_space 3 web   '^(Arc|Google Chrome|Firefox|Safari)$'
+route_app_to_space 4 comms '^(Slack|Discord|Messages)$'
+route_app_to_space 5 docs  '^(Notion|Obsidian|Preview)$'

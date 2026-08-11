@@ -1,5 +1,5 @@
 # open terminal
-cmd - return : open -a "Ghostty"
+cmd - return : if [ -d "/Applications/Ghostty.app" ] || [ -d "$HOME/Applications/Ghostty.app" ]; then open -a "Ghostty"; else open -a "Terminal"; fi
 
 # open chrome 
 cmd + shift - return : open -a "Google Chrome"
@@ -9,15 +9,9 @@ cmd + shift - l : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Claude
 cmd + shift - y : if [ -d "/Users/itai/Applications/Chrome Apps.localized/YouTube.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/YouTube.app"; else open "https://youtube.com"; fi
 cmd + shift - g : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Gmail.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Gmail.app"; else open "https://gmail.com"; fi
 cmd + shift - m : open -a "Messages"
-cmd + shift - p : open -a "Spotify"
-cmd + shift - s : open -a "Slack"
+cmd + shift - p : if [ -d "/Applications/Spotify.app" ] || [ -d "$HOME/Applications/Spotify.app" ]; then open -a "Spotify"; else open "https://open.spotify.com"; fi
+cmd + shift - s : if [ -d "/Applications/Slack.app" ] || [ -d "$HOME/Applications/Slack.app" ]; then open -a "Slack"; else open "https://app.slack.com/client"; fi
 cmd + shift - w : open -a /Applications/WhatsApp.app
-
-# sketchybar
-# Toggle bar visibility
-alt + shift - b : sketchybar --bar hidden=toggle
-# Force a full refresh (useful while hacking)
-# alt + shift - b : sketchybar --reload && sketchybar --update
 
 # moves focus between windows in the current focused display
 alt - h : yabai -m window --focus west
@@ -73,11 +67,8 @@ alt - f : yabai -m window --focus mouse && \
 # toggle window native fullscreen
 shift + alt - f : yabai -m window --toggle native-fullscreen
 
-# increase gap in focused space
+# adjust gap in focused space
 alt - g : yabai -m space --gap rel:10
-shift + alt - g : yabai -m space --gap rel:-10
-
-# decrease gap in focused space
 shift + alt - g : yabai -m space --gap rel:-10
 
 # create a new space and follow focus
@@ -92,7 +83,7 @@ shift + alt - n : yabai -m space --create && \
                   yabai -m space --focus "${index}"
 
 # balance size of windows
-shift + alt - 0 : yabai -m space --balance
+ctrl + alt - 0 : yabai -m space --balance
 
 # swap window
 shift + alt - h : yabai -m window --swap west
@@ -135,9 +126,4 @@ ctrl + alt + cmd - k : yabai -m window --resize top:0:40
 ctrl + alt + cmd - l : yabai -m window --resize right:-40:0
 
 # restart yabai
-ctrl + alt + cmd - r : launchctl kickstart -k "gui/${UID}/homebrew.mxcl.yabai"
-
-ctrl + alt + cmd - o : node ~/Projects/Personal/philips-hue-experiments/commands/turn-on.js --all
-ctrl + alt + cmd - f : node ~/Projects/Personal/philips-hue-experiments/commands/turn-off.js --all
-
-
+ctrl + alt + cmd - r : yabai --restart-service
