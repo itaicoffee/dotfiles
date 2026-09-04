@@ -1,3 +1,3 @@
 #!/bin/zsh
 
-curl 'wttr.in/New+York?format=3&m' | sed 's/.*: //'
+curl -fsS 'wttr.in/New+York?format=%t&m' | sed 's/+//; s/°//; s/C/c/'

@@ -1,0 +1,148 @@
+#!/bin/sh
+# Toggle one Quake-style WezTerm running OpenCode. Never spawn a second.
+YABAI="${YABAI:-/opt/homebrew/bin/yabai}"
+WEZTERM="${WEZTERM:-/opt/homebrew/bin/wezterm}"
+OLLAMA="${OLLAMA:-/opt/homebrew/bin/ollama}"
+JQ="${JQ:-/usr/bin/jq}"
+CACHE="${HOME}/.cache"
+WID_FILE="${CACHE}/opencode-quake-wid"
+PID_FILE="${CACHE}/opencode-quake-pid"
+LOG="${CACHE}/opencode-quake.log"
+MODEL="orcarouter/Qwen3.8-27B-Uncensored:q5_K_M"
+GRID="10:1:0:0:1:4"
+# yabai on this machine reports the app as wezterm-gui
+APP_RE="^(WezTerm|wezterm-gui)$"
+
+mkdir -p "$CACHE"
+log() { printf '%s %s\n' "$(date '+%H:%M:%S')" "$*" >> "$LOG"; }
+
+pid_alive() { [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null; }
+
+window_alive() {
+  [ -n "${1:-}" ] && "$YABAI" -m query --windows --window "$1" >/dev/null 2>&1
+}
+
+is_wez() {
+  "$YABAI" -m query --windows | "$JQ" -r --argjson wid "$1" '
+    [.[] | select(.id == $wid and (.app == "WezTerm" or .app == "wezterm-gui"))] | length
+  ' 2>/dev/null
+}
+
+find_by_pid() {
+  [ -n "${1:-}" ] || return 0
+  "$YABAI" -m query --windows | "$JQ" -r --argjson pid "$1" '
+    [.[] | select((.app == "WezTerm" or .app == "wezterm-gui") and .pid == $pid) | .id] | first // empty
+  ' 2>/dev/null
+}
+
+find_by_title() {
+  "$YABAI" -m query --windows | "$JQ" -r '
+    [.[]
+      | select(.app == "WezTerm" or .app == "wezterm-gui")
+      | select((.title // "") | test("opencode-quake|opencode|^OC "; "i"))
+      | .id
+    ] | first // empty
+  ' 2>/dev/null
+}
+
+find_new_id() {
+  "$YABAI" -m query --windows | "$JQ" -r --arg before "$1" '
+    ($before | split(" ")) as $old
+    | [.[]
+        | select(.app == "WezTerm" or .app == "wezterm-gui")
+        | .id | tostring
+        | select(($old | index(.)) | not)
+      ] | first // empty
+  ' 2>/dev/null
+}
+
+wez_ids() {
+  "$YABAI" -m query --windows | "$JQ" -r '
+    [.[] | select(.app == "WezTerm" or .app == "wezterm-gui") | .id] | join(" ")
+  '
+}
+
+window_pid() {
+  "$YABAI" -m query --windows --window "$1" | "$JQ" -r '.pid'
+}
+
+place_quake() {
+  floating=$("$YABAI" -m query --windows --window "$1" | "$JQ" -r '."is-floating"')
+  if [ "$floating" != "true" ]; then
+    "$YABAI" -m window "$1" --toggle float || true
+  fi
+  sticky=$("$YABAI" -m query --windows --window "$1" | "$JQ" -r '."is-sticky"')
+  if [ "$sticky" != "true" ]; then
+    "$YABAI" -m window "$1" --toggle sticky || true
+  fi
+  "$YABAI" -m window "$1" --layer above || true
+  "$YABAI" -m window "$1" --grid "$GRID" || true
+  "$YABAI" -m window "$1" --focus || true
+}
+
+save_state() {
+  printf '%s\n' "$1" > "$WID_FILE"
+  printf '%s\n' "$2" > "$PID_FILE"
+}
+
+id=""
+pid=""
+[ -f "$WID_FILE" ] && id=$(tr -cd '0-9' < "$WID_FILE")
+[ -f "$PID_FILE" ] && pid=$(tr -cd '0-9' < "$PID_FILE")
+
+if ! window_alive "$id" && pid_alive "$pid"; then
+  id=$(find_by_pid "$pid")
+fi
+if ! window_alive "$id"; then
+  id=$(find_by_title)
+  if window_alive "$id"; then
+    pid=$(window_pid "$id")
+  fi
+fi
+
+if window_alive "$id"; then
+  [ -z "$pid" ] && pid=$(window_pid "$id")
+  save_state "$id" "$pid"
+  minimized=$("$YABAI" -m query --windows --window "$id" | "$JQ" -r '."is-minimized"')
+  yvis=$("$YABAI" -m query --windows --window "$id" | "$JQ" -r '."is-visible"')
+  if [ "$minimized" = "false" ] && [ "$yvis" = "true" ]; then
+    "$YABAI" -m window "$id" --minimize || true
+    log "hide id=$id pid=$pid"
+  else
+    if [ "$minimized" = "true" ]; then
+      "$YABAI" -m window "$id" --deminimize || true
+    fi
+    place_quake "$id"
+    log "show id=$id pid=$pid"
+  fi
+  exit 0
+fi
+
+before=$(wez_ids)
+log "spawn before=[$before]"
+
+WEZTERM_QUAKE=1 "$WEZTERM" start --always-new-process \
+  --class org.wezfurlong.wezterm.quake \
+  --position active:0,0 -- \
+  "$OLLAMA" launch opencode --model "$MODEL" >>"$LOG" 2>&1 &
+pid=$!
+
+i=0
+while [ "$i" -lt 80 ]; do
+  id=$(find_by_pid "$pid")
+  [ -z "$id" ] && id=$(find_by_title)
+  [ -z "$id" ] && id=$(find_new_id "$before")
+  if [ -n "$id" ]; then
+    real=$(window_pid "$id")
+    [ -n "$real" ] && [ "$real" != "null" ] && pid=$real
+    save_state "$id" "$pid"
+    place_quake "$id"
+    log "spawned id=$id pid=$pid"
+    exit 0
+  fi
+  i=$((i + 1))
+  sleep 0.1
+done
+
+log "spawn timeout pid=$pid"
+exit 1

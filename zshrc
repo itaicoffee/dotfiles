@@ -151,3 +151,7 @@ alias gp='git pull'
 alias gs='git status'
 alias gss="git status -s | grep ^[A-Z] | awk '{ print \$2 }'"
 alias gca='git commit --amend --all --no-edit'
+export PATH="$HOME/.local/bin:$PATH"
+
+# opencode
+export PATH=/Users/itai/.opencode/bin:$PATH

@@ -1,23 +1,32 @@
 # open terminal
-cmd - return : if [ -d "/Applications/Ghostty.app" ] || [ -d "$HOME/Applications/Ghostty.app" ]; then open -a "Ghostty"; else open -a "Terminal"; fi
+cmd - return : if [ -d "/Applications/WezTerm.app" ] || [ -d "$HOME/Applications/WezTerm.app" ]; then open -a "WezTerm"; elif [ -d "/Applications/Ghostty.app" ] || [ -d "$HOME/Applications/Ghostty.app" ]; then open -a "Ghostty"; else open -a "Terminal"; fi
 
-# open chrome 
+# open chrome
 cmd + shift - return : open -a "Google Chrome"
 
-cmd + shift - c : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Chat.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Chat.app"; else open "https://chat.openai.com"; fi
+cmd + shift - a : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Chat.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Chat.app"; else open "https://chat.openai.com"; fi
+cmd + shift - c : open "https://calendar.google.com"
+cmd + shift - e : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Gmail.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Gmail.app"; else open "https://gmail.com"; fi
+cmd + shift - f : open ~
+cmd + shift - g : open -a "Signal"
+cmd + shift - n : /opt/homebrew/bin/wezterm start -- /opt/homebrew/bin/nvim
 cmd + shift - l : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Claude.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Claude.app"; else open "https://claude.ai"; fi
 cmd + shift - y : if [ -d "/Users/itai/Applications/Chrome Apps.localized/YouTube.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/YouTube.app"; else open "https://youtube.com"; fi
-cmd + shift - g : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Gmail.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Gmail.app"; else open "https://gmail.com"; fi
 cmd + shift - m : open -a "Messages"
 cmd + shift - p : if [ -d "/Applications/Spotify.app" ] || [ -d "$HOME/Applications/Spotify.app" ]; then open -a "Spotify"; else open "https://open.spotify.com"; fi
 cmd + shift - s : if [ -d "/Applications/Slack.app" ] || [ -d "$HOME/Applications/Slack.app" ]; then open -a "Slack"; else open "https://app.slack.com/client"; fi
 cmd + shift - w : open -a /Applications/WhatsApp.app
+cmd + shift - o : /Users/itai/.local/bin/opencode-quake
 
 # moves focus between windows in the current focused display
-alt - h : yabai -m window --focus west
-alt - j : yabai -m window --focus south
-alt - k : yabai -m window --focus north
-alt - l : yabai -m window --focus east
+alt - h : yabai -m window --focus west || yabai -m window --focus east
+alt - j : yabai -m window --focus south || yabai -m window --focus north
+alt - k : yabai -m window --focus north || yabai -m window --focus south
+alt - l : yabai -m window --focus east || yabai -m window --focus west
+alt - left : yabai -m window --focus west || yabai -m window --focus east
+alt - down : yabai -m window --focus south || yabai -m window --focus north
+alt - up : yabai -m window --focus north || yabai -m window --focus south
+alt - right : yabai -m window --focus east || yabai -m window --focus west
 
 # moves focus between spaces 
 alt - 1 : yabai -m space --focus 1
@@ -90,40 +99,57 @@ shift + alt - h : yabai -m window --swap west
 shift + alt - j : yabai -m window --swap south
 shift + alt - k : yabai -m window --swap north
 shift + alt - l : yabai -m window --swap east
+shift + alt - left : yabai -m window --swap west
+shift + alt - down : yabai -m window --swap south
+shift + alt - up : yabai -m window --swap north
+shift + alt - right : yabai -m window --swap east
 
 # move window
 shift + cmd - h : yabai -m window --warp west
 shift + cmd - j : yabai -m window --warp south
 shift + cmd - k : yabai -m window --warp north
 shift + cmd - l : yabai -m window --warp east
+shift + cmd - left : yabai -m window --warp west
+shift + cmd - down : yabai -m window --warp south
+shift + cmd - up : yabai -m window --warp north
+shift + cmd - right : yabai -m window --warp east
 
 # send window to a space 
-shift + alt - 1 : yabai -m window --space 1
-shift + alt - 2 : yabai -m window --space 2
-shift + alt - 3 : yabai -m window --space 3
-shift + alt - 4 : yabai -m window --space 4
-shift + alt - 5 : yabai -m window --space 5
-shift + alt - 6 : yabai -m window --space 6
-shift + alt - 7 : yabai -m window --space 7
-shift + alt - 8 : yabai -m window --space 8
-shift + alt - 9 : yabai -m window --space 9
-shift + alt - 0 : yabai -m window --space 10
+shift + alt - 1 : yabai -m window --space 1 && yabai -m space --focus 1
+shift + alt - 2 : yabai -m window --space 2 && yabai -m space --focus 2
+shift + alt - 3 : yabai -m window --space 3 && yabai -m space --focus 3
+shift + alt - 4 : yabai -m window --space 4 && yabai -m space --focus 4
+shift + alt - 5 : yabai -m window --space 5 && yabai -m space --focus 5
+shift + alt - 6 : yabai -m window --space 6 && yabai -m space --focus 6
+shift + alt - 7 : yabai -m window --space 7 && yabai -m space --focus 7
+shift + alt - 8 : yabai -m window --space 8 && yabai -m space --focus 8
+shift + alt - 9 : yabai -m window --space 9 && yabai -m space --focus 9
+shift + alt - 0 : yabai -m window --space 10 && yabai -m space --focus 10
 
 # change layout of desktop
 ctrl + alt - a : yabai -m space --layout bsp
 ctrl + alt - d : yabai -m space --layout float
+alt - s : yabai -m space --layout stack
 
 # increase window size
 ctrl + alt - h : yabai -m window --resize left:-40:0
 ctrl + alt - j : yabai -m window --resize bottom:0:40
 ctrl + alt - k : yabai -m window --resize top:0:-40
 ctrl + alt - l : yabai -m window --resize right:40:0
+ctrl + alt - left : yabai -m window --resize left:-40:0
+ctrl + alt - down : yabai -m window --resize bottom:0:40
+ctrl + alt - up : yabai -m window --resize top:0:-40
+ctrl + alt - right : yabai -m window --resize right:40:0
 
 # decrease window size
 ctrl + alt + cmd - h : yabai -m window --resize left:40:0
 ctrl + alt + cmd - j : yabai -m window --resize bottom:0:-40
 ctrl + alt + cmd - k : yabai -m window --resize top:0:40
 ctrl + alt + cmd - l : yabai -m window --resize right:-40:0
+ctrl + alt + cmd - left : yabai -m window --resize left:40:0
+ctrl + alt + cmd - down : yabai -m window --resize bottom:0:-40
+ctrl + alt + cmd - up : yabai -m window --resize top:0:40
+ctrl + alt + cmd - right : yabai -m window --resize right:-40:0
 
 # restart yabai
 ctrl + alt + cmd - r : yabai --restart-service

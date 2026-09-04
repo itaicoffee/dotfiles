@@ -7,6 +7,7 @@ yabai -m config bottom_padding   8
 yabai -m config left_padding     8
 yabai -m config right_padding    8
 yabai -m config auto_balance     on
+yabai -m config window_animation_duration 0.0
 
 # mouse helpers
 yabai -m config mouse_modifier   alt
@@ -19,6 +20,7 @@ yabai -m rule --add app="^App Store$"       manage=off
 yabai -m rule --add app="^Zoom$"            manage=off
 yabai -m rule --add app="^Simulator$"       manage=off
 yabai -m rule --add app="^Photos$"          manage=off
+yabai -m rule --add app="^(WezTerm|wezterm-gui)$" title="^(opencode-quake|OpenCode|OC )" manage=off sticky=on sub-layer=above
 yabai -m rule --add app="^Calendar$" title=".*" manage=off
 
 # Label available spaces and route apps by role. Missing spaces are skipped so
@@ -31,7 +33,7 @@ route_app_to_space() {
 }
 
 route_app_to_space 1 dev   '^Xcode$'
-route_app_to_space 2 term  '^(Ghostty|Kitty|iTerm2|Terminal)$'
+route_app_to_space 2 term  '^(WezTerm|wezterm-gui|Ghostty|Kitty|iTerm2|Terminal)$'
 route_app_to_space 3 web   '^(Arc|Google Chrome|Firefox|Safari)$'
 route_app_to_space 4 comms '^(Slack|Discord|Messages)$'
 route_app_to_space 5 docs  '^(Notion|Obsidian|Preview)$'

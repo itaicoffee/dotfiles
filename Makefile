@@ -208,39 +208,16 @@ help:
 	@echo "  install_configs - Install configuration files"
 	@echo "  install_bin     - Install bin scripts"
 	@echo "  install_xbar    - Install xbar plugins"
-	@echo "  check-chrome-profiles - Check Chrome profile environment variables"
+	@echo "  check-chrome-profiles - Interactively match Chrome profiles to WORK/PERSONAL/DEFAULT"
 	@echo "  list-chrome-profiles - List available Chrome profiles"
 	@echo "  set-chrome-profile - Set Chrome profile environment variable"
 
-# Check Chrome profile environment variables (now sourcing ~/.profile first)
+# Interactively match available Chrome profiles to WORK/PERSONAL/DEFAULT.
+# Reads the profiles that actually exist on this machine and prompts for any
+# CHROME_PROFILE_* that isn't already set in ~/.profile (see
+# chrome-profiles-setup.sh). Already-set values are left untouched.
 check-chrome-profiles:
-	@echo "Checking Chrome profile environment variables..."
-	@if [ -f "$(HOME)/.profile" ]; then \
-		echo "Sourcing ~/.profile to check for Chrome profile variables..."; \
-		CHROME_PROFILE_WORK=$$(source "$(HOME)/.profile" 2>/dev/null && echo "$$CHROME_PROFILE_WORK"); \
-		CHROME_PROFILE_PERSONAL=$$(source "$(HOME)/.profile" 2>/dev/null && echo "$$CHROME_PROFILE_PERSONAL"); \
-		CHROME_PROFILE_DEFAULT=$$(source "$(HOME)/.profile" 2>/dev/null && echo "$$CHROME_PROFILE_DEFAULT"); \
-		if [ -z "$$CHROME_PROFILE_WORK" ]; then \
-			echo "WARNING: CHROME_PROFILE_WORK is not defined in ~/.profile"; \
-			echo "Run 'make list-chrome-profiles' to see available profiles"; \
-			echo "Then set it with 'make set-chrome-profile PROFILE_TYPE=WORK PROFILE_NAME=YourProfileName'"; \
-		else \
-			echo "CHROME_PROFILE_WORK is set to: $$CHROME_PROFILE_WORK"; \
-		fi; \
-		if [ -z "$$CHROME_PROFILE_PERSONAL" ]; then \
-			echo "WARNING: CHROME_PROFILE_PERSONAL is not defined in ~/.profile"; \
-		else \
-			echo "CHROME_PROFILE_PERSONAL is set to: $$CHROME_PROFILE_PERSONAL"; \
-		fi; \
-		if [ -z "$$CHROME_PROFILE_DEFAULT" ]; then \
-			echo "WARNING: CHROME_PROFILE_DEFAULT is not defined in ~/.profile"; \
-		else \
-			echo "CHROME_PROFILE_DEFAULT is set to: $$CHROME_PROFILE_DEFAULT"; \
-		fi; \
-	else \
-		echo "~/.profile doesn't exist yet. Run 'make ensure-profile' first."; \
-		echo "Then set Chrome profiles with 'make set-chrome-profile PROFILE_TYPE=TYPE PROFILE_NAME=NAME'"; \
-	fi
+	@bash "$(DOTFILES_DIR)/chrome-profiles-setup.sh"
 
 # List available Chrome profiles
 list-chrome-profiles:
