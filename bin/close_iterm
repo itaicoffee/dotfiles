@@ -1,3 +1,0 @@
-#!/bin/zsh
-
-/opt/homebrew/bin/wezterm cli kill-pane

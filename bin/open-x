@@ -1,0 +1,46 @@
+#!/bin/sh
+# Source machine-specific settings (skhd does not run a login shell)
+[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+
+YABAI="${YABAI:-/opt/homebrew/bin/yabai}"
+JQ="${JQ:-/usr/bin/jq}"
+CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
+PROFILE="${CHROME_PROFILE_PERSONAL:-Default}"
+
+wid=$("$YABAI" -m query --windows 2>/dev/null | "$JQ" -r '
+  [.[]
+    | select(.app == "Google Chrome")
+    | select(.title | test("(?i)(/ X$|^X$|\\bTwitter\\b)"))
+    | .id] | first // empty
+')
+
+if [ -n "$wid" ]; then
+  "$YABAI" -m window --focus "$wid" 2>/dev/null && exit 0
+fi
+
+found=$(osascript <<'EOF'
+tell application "System Events"
+  if not (exists process "Google Chrome") then return "missing"
+end tell
+tell application "Google Chrome"
+  repeat with w in windows
+    set tabIndex to 0
+    repeat with t in tabs of w
+      set tabIndex to tabIndex + 1
+      set u to URL of t as string
+      if u contains "://x.com" or u contains "://www.x.com" or u contains "://twitter.com" or u contains "://www.twitter.com" or u contains "://mobile.x.com" or u contains "://mobile.twitter.com" then
+        set active tab index of w to tabIndex
+        set index of w to 1
+        activate
+        return "found"
+      end if
+    end repeat
+  end repeat
+end tell
+return "missing"
+EOF
+)
+
+[ "$found" = "found" ] && exit 0
+
+open -na "Google Chrome" --args --profile-directory="$PROFILE" --app="https://x.com"

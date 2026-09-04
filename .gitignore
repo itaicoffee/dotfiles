@@ -1,1 +1,7 @@
 *.DS_Store
+.DS_Store
+
+# machine-specific / local-only files
+/profile
+bin/dict
+.claude/settings.local.json

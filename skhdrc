@@ -14,9 +14,10 @@ cmd + shift - l : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Claude
 cmd + shift - y : if [ -d "/Users/itai/Applications/Chrome Apps.localized/YouTube.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/YouTube.app"; else open "https://youtube.com"; fi
 cmd + shift - m : open -a "Messages"
 cmd + shift - p : if [ -d "/Applications/Spotify.app" ] || [ -d "$HOME/Applications/Spotify.app" ]; then open -a "Spotify"; else open "https://open.spotify.com"; fi
+cmd + shift - t : "$HOME/Documents/Code/dotfiles/bin/open-x"
 cmd + shift - s : if [ -d "/Applications/Slack.app" ] || [ -d "$HOME/Applications/Slack.app" ]; then open -a "Slack"; else open "https://app.slack.com/client"; fi
 cmd + shift - w : open -a /Applications/WhatsApp.app
-cmd + shift - o : /Users/itai/.local/bin/opencode-quake
+cmd + shift - o : "$HOME/.local/bin/opencode-quake"
 
 # moves focus between windows in the current focused display
 alt - h : yabai -m window --focus west || yabai -m window --focus east
@@ -111,8 +112,8 @@ shift + cmd - k : yabai -m window --warp north
 shift + cmd - l : yabai -m window --warp east
 shift + cmd - left : yabai -m window --warp west
 shift + cmd - down : yabai -m window --warp south
-shift + cmd - up : yabai -m window --warp north
 shift + cmd - right : yabai -m window --warp east
+shift + cmd - up : "$HOME/Documents/Code/dotfiles/bin/show-desktop"
 
 # send window to a space 
 shift + alt - 1 : yabai -m window --space 1 && yabai -m space --focus 1

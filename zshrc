@@ -1,9 +1,13 @@
 # ==============================================================================
-# SECRETS & ENVIRONMENT SETUP
+# MACHINE-SPECIFIC SETTINGS & SECRETS
 # ==============================================================================
 
-# Source secrets
-test -f ~/.bash_profile_secrets && . ~/.bash_profile_secrets
+# ~/.profile is local to this machine (not managed by git) and holds env vars
+# like the CHROME_PROFILE_* mappings
+[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+
+# Source secrets if present
+[ -f "$HOME/.bash_profile_secrets" ] && . "$HOME/.bash_profile_secrets"
 
 # ==============================================================================
 # ZSH CONFIGURATION
@@ -31,14 +35,6 @@ PROMPT='%F{green}%~%f ${vcs_info_msg_0_}%F{yellow}λ%f '
 # Editor
 export EDITOR=nvim
 
-# Path shortcuts
-export CLOUD=$HOME/Dropbox/plycion/cloud
-
-# Android
-export ANDROID_HOME=/Users/Itai/Library/Android/sdk
-export ANDROID_NDK_HOME=/Users/Itai/Library/Android/sdk/ndk-bundle
-export ANDROID_BUILD=assembleGoogleNowearableDefaultbrandDebug
-
 # Node version manager
 export NVM_DIR="$HOME/.nvm"
 
@@ -53,43 +49,34 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 # PATH CONFIGURATION
 # ==============================================================================
 
-# Standard PATH
-export PATH=/usr/bin
-export PATH=$PATH:/bin
-export PATH=$PATH:/usr/sbin
-export PATH=$PATH:/sbin
-export PATH=$PATH:/usr/local/bin
+# Keep PATH free of duplicates
+typeset -U path PATH
 
-# Homebrew (Intel)
-export PATH="/usr/local/bin:$PATH"
-
-# Homebrew (Apple Silicon)
-export PATH="/opt/homebrew/bin:$PATH"
-
-# User binaries
-export PATH=$PATH:~/bin
-
-# Android SDK
-export PATH=$PATH:/Users/Itai/Desktop/android/android-sdk-macosx/tools
-export PATH=$PATH:/Users/Itai/Desktop/android/android-sdk-macosx/platform-tools
-
-# Maven
-export PATH=$PATH:/usr/local/bin/maven/bin
+path=(
+  $HOME/.opencode/bin
+  $HOME/.local/bin
+  /opt/homebrew/bin
+  /usr/local/bin
+  /usr/bin
+  /bin
+  /usr/sbin
+  /sbin
+  $path
+)
 
 # ==============================================================================
 # RUNTIME INITIALIZATION
 # ==============================================================================
 
-# Launch control environment setup (for Android Studio via Finder)
-launchctl setenv PATH $PATH
-launchctl setenv ANDROID_NDK_HOME $ANDROID_NDK_HOME
-
-# Node version manager (nodenv)
-which nodenv >/dev/null && eval "$(nodenv init -)"
-
-# NVM
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+# NVM (lazy-loaded on first `nvm` call to keep shell startup fast)
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  nvm() {
+    unset -f nvm
+    . "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+    nvm "$@"
+  }
+fi
 
 # Zoxide (smarter cd)
 eval "$(zoxide init zsh)"
@@ -119,18 +106,11 @@ zz() {
 # ALIASES
 # ==============================================================================
 
-# Project navigation
-alias d2='cd ~/Documents/code/duolingo-2 && . .pyenv/bin/activate'
-alias dios='cd ~/Documents/code/duolingo-ios'
-alias dandroid='cd ~/Documents/code/duolingo-android'
-alias dweb='cd ~/Documents/code/duolingo-web'
-alias dt='cd ~/Documents/code/athena-backend'
-
 # Tool defaults
 alias lk='goo -l'  # Google I'm feeling lucky
 alias nosetests='nosetests --nocapture --nologcapture'
 alias sedi="sed -i ''"
-alias rg='rg -i'
+alias rgi='rg -i'  # case-insensitive search (rg keeps its own defaults)
 
 # Application overrides
 alias vim=nvim
@@ -143,7 +123,7 @@ alias gm='git merge'
 alias gr='git reset'
 alias grh='git reset --hard'
 alias grhh='git reset --hard HEAD'
-alias grho='git reset --hard origin/`git_branch`'
+alias grho='git reset --hard "origin/$(git branch --show-current)"'
 alias gl='git log'
 alias gls='git ls-files'
 alias glsu='git ls-files --others --exclude-standard'
@@ -151,7 +131,3 @@ alias gp='git pull'
 alias gs='git status'
 alias gss="git status -s | grep ^[A-Z] | awk '{ print \$2 }'"
 alias gca='git commit --amend --all --no-edit'
-export PATH="$HOME/.local/bin:$PATH"
-
-# opencode
-export PATH=/Users/itai/.opencode/bin:$PATH

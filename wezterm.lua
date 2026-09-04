@@ -1,6 +1,6 @@
 -- ~/.config/wezterm/wezterm.lua
 local wezterm = require("wezterm")
-local config = {}
+local config = wezterm.config_builder()
 local quake = os.getenv("WEZTERM_QUAKE") == "1"
 
 config.color_scheme = "Dracula"
