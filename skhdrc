@@ -8,14 +8,14 @@ cmd + shift - a : open -a "ChatGPT"
 cmd + shift - c : open "https://calendar.google.com"
 cmd + shift - e : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Gmail.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Gmail.app"; else open "https://gmail.com"; fi
 cmd + shift - f : open ~
-cmd + shift - g : open -a "Signal"
+cmd + shift - g : open -a "Grok Bot"
 cmd + shift - n : /opt/homebrew/bin/wezterm start -- /opt/homebrew/bin/nvim
 cmd + shift - l : if [ -d "/Users/itai/Applications/Chrome Apps.localized/Claude.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/Claude.app"; else open "https://claude.ai"; fi
 cmd + shift - y : if [ -d "/Users/itai/Applications/Chrome Apps.localized/YouTube.app" ]; then open -a "/Users/itai/Applications/Chrome Apps.localized/YouTube.app"; else open "https://youtube.com"; fi
 cmd + shift - m : open -a "Messages"
 cmd + shift - p : if [ -d "/Applications/Spotify.app" ] || [ -d "$HOME/Applications/Spotify.app" ]; then open -a "Spotify"; else open "https://open.spotify.com"; fi
 cmd + shift - t : "$HOME/Documents/Code/dotfiles/bin/open-x"
-cmd + shift - s : if [ -d "/Applications/Slack.app" ] || [ -d "$HOME/Applications/Slack.app" ]; then open -a "Slack"; else open "https://app.slack.com/client"; fi
+cmd + shift - s : open -a "Signal"
 cmd + shift - w : open -a /Applications/WhatsApp.app
 cmd + shift - o : "$HOME/.local/bin/opencode-quake"
 
