@@ -81,6 +81,12 @@ fi
 # Zoxide (smarter cd)
 eval "$(zoxide init zsh)"
 
+# SSH agent: start one if none is running and load keys from the macOS keychain
+if [ -z "$SSH_AUTH_SOCK" ]; then
+  eval "$(ssh-agent -s)" >/dev/null
+  /usr/bin/ssh-add --apple-load-keychain 2>/dev/null
+fi
+
 # ==============================================================================
 # FUNCTIONS
 # ==============================================================================
